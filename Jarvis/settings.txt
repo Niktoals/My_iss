@@ -1,0 +1,1 @@
+1экран,0, играть,Py\snake_001.py, браузер,C:\Program Files\Google\Chrome\Application\chrome.exe,2найди,'0'
