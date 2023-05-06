@@ -31,31 +31,22 @@ def mon_bet():
     elif battery.percent==48 and plug==False:
         play(AudioSegment.from_wav(f'C:/Users/1/Desktop/Progs/Jarvis Sound Pack от Jarvis Desktop/Заряд батареи, %/Энергия 48% и падает сэр.wav'))
         
-def analis_of_digits(res):
-    if fuzz.partial_ratio("один", res["text"])>=90:
-        return 100
-    if fuzz.partial_ratio("два", res["text"])>=90:
-        return 200
-    if fuzz.partial_ratio("три", res["text"])>=90:
-        return 300
-    if fuzz.partial_ratio("четыре", res["text"])>=90:
-        return 400
-    if fuzz.partial_ratio("пять", res["text"])>=90:
-        return 500    
-    
 def activating(res):
     if not os.path.exists('settings'):
         os.mkdir('settings')
     else:
-        for filename in os.listdir('settings'):
-            if fuzz.partial_ratio(res, filename[:filename.rfind('.'):])>=70:
-                return filename
+        if len(os.listdir('settings'))!=0:
+            for filename in os.listdir('settings'):
+                if fuzz.partial_ratio(res, filename[:filename.rfind('.'):])>=70:
+                    return filename
+        else:
+            print('Добавте ссылки на приложения в папку, пока что папка пуста...')
 
 def user_set_do(res, count_scr):
     if fuzz.partial_ratio("пауза", res["text"][6::])>=90:
         pg.press('space')
         
-    if fuzz.partial_ratio('фото', res["text"])>=80:
+    if fuzz.partial_ratio('скрин', res["text"])>=80:
         play(AudioSegment.from_wav(f'C:/Users/1/Desktop/Progs/Jarvis Sound Pack от Jarvis Desktop/{random.choice(["Да сэр", "Загружаю сэр", "Есть", "Как пожелаете ", "К вашим услугам сэр", "Запрос выполнен сэр", "Образ создан"])}.wav'))
         screen=pg.screenshot()
         if not os.path.exists("photos"):
