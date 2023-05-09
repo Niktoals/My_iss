@@ -12,6 +12,7 @@ import psutil
 import webbrowser 
 import pvporcupine
 import struct
+import Keyboard_mini
 
 def mon_bet():
     battery = psutil.sensors_battery()
@@ -59,15 +60,36 @@ def user_set_do(res, count_scr):
         fPath = "C:/Program Files/Google/Chrome/Application/chrome.exe %s"
         webbrowser.get(fPath).open("https://www.google.com/search?q=" + res["text"][res['text'].find('найди')+6::])
 
-    if fuzz.partial_ratio('запусти', res["text"])>=90:
+    if fuzz.partial_ratio('заметку', res["text"])>=100:
+        date=time.strftime("%m %d %Y")
+        if not os.path.exists('AllNotes'):
+            os.mkdir('AllNotes')
+        if not os.path.exists(f'AllNotes/Notes{date}'):
+            os.mkdir(f'AllNotes/Notes{date}')
+            f=open(f'AllNotes/Notes{date}/Note', 'a')
+            f.write(res["text"][res['text'].find('заметку')+8::])
+        else:
+            f=open(f'Notes/Notes{date}/Note', 'a')
+            f.write(res["text"][res['text'].find('заметку')+8::])
+        f.close()
+        play(AudioSegment.from_wav(f'C:/Users/1/Desktop/Progs/Jarvis Sound Pack от Jarvis Desktop/{random.choice(["Да сэр", "Загружаю сэр", "Есть", "Как пожелаете ", "К вашим услугам сэр", "Запрос выполнен сэр", "Образ создан"])}.wav'))
+
+
+    if fuzz.partial_ratio('запусти', res["text"])>=100:
         filename=activating(res["text"][res['text'].find('запусти')+8::])
         print(filename)
         try:
             os.startfile(f'C:/Users/1/Desktop/Progs/settings/{filename}')
+            play(AudioSegment.from_wav(f'C:/Users/1/Desktop/Progs/Jarvis Sound Pack от Jarvis Desktop/{random.choice(["Да сэр", "Загружаю сэр", "Есть", "Как пожелаете ", "К вашим услугам сэр", "Запрос выполнен сэр", "Образ создан"])}.wav'))
         except Exception:
             print('Не найдено приложения в папке')
 
-
+    if fuzz.partial_ratio('жесты', res["text"])>=90:
+        try:
+            Keyboard_mini.main()
+        except Exception:
+            print('Ошибка')
+    
 def reading_model():
     if not os.path.exists("model.txt"):
         f = open('model.txt', "w", encoding='utf-8', errors='replace')
