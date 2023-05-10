@@ -12,7 +12,16 @@ import psutil
 import webbrowser 
 import pvporcupine
 import struct
+import telebot
 import Keyboard_mini
+import pyperclip, keyboard
+import requests
+
+def paste(text: str):    
+    buffer = pyperclip.paste()
+    pyperclip.copy(text)
+    keyboard.press_and_release('ctrl + v')
+
 
 def mon_bet():
     battery = psutil.sensors_battery()
@@ -42,8 +51,22 @@ def activating(res):
                     return filename
         else:
             print('Добавте ссылки на приложения в папку, пока что папка пуста...')
+def read_file():
+    url = f"https://api.telegram.org/bot5505410546:AAHxnzeBdA3BT4UrCKaSYHxGyvfg7vS9EIg/getUpdates"
+    ls_old=requests.get(url).json()
+    ls=[]
+    ls_new=[]
+    f=open('chat_ides.txt')
+    for i in f.readlines():
+        ls.append(i[:-1:])
+    f.close()
+    for i in ls_old['result']:
+        ls_new.append(str(i['message']['chat']['id']))
+    return ls, ls_new
 
 def user_set_do(res, count_scr):
+    global date_create
+
     if fuzz.partial_ratio("пауза", res["text"][6::])>=90:
         pg.press('space')
         
@@ -69,7 +92,7 @@ def user_set_do(res, count_scr):
             f=open(f'AllNotes/Notes{date}/Note', 'a')
             f.write(res["text"][res['text'].find('заметку')+8::])
         else:
-            f=open(f'Notes/Notes{date}/Note', 'a')
+            f=open(f'AllNotes/Notes{date}/Note', 'a')
             f.write(res["text"][res['text'].find('заметку')+8::])
         f.close()
         play(AudioSegment.from_wav(f'C:/Users/1/Desktop/Progs/Jarvis Sound Pack от Jarvis Desktop/{random.choice(["Да сэр", "Загружаю сэр", "Есть", "Как пожелаете ", "К вашим услугам сэр", "Запрос выполнен сэр", "Образ создан"])}.wav'))
@@ -78,17 +101,44 @@ def user_set_do(res, count_scr):
     if fuzz.partial_ratio('запусти', res["text"])>=100:
         filename=activating(res["text"][res['text'].find('запусти')+8::])
         print(filename)
-        try:
+        try: 
+            date_create=time.time() 
             os.startfile(f'C:/Users/1/Desktop/Progs/settings/{filename}')
             play(AudioSegment.from_wav(f'C:/Users/1/Desktop/Progs/Jarvis Sound Pack от Jarvis Desktop/{random.choice(["Да сэр", "Загружаю сэр", "Есть", "Как пожелаете ", "К вашим услугам сэр", "Запрос выполнен сэр", "Образ создан"])}.wav'))
         except Exception:
             print('Не найдено приложения в папке')
 
+    if fuzz.partial_ratio('отправь', res["text"])>=100:
+        bot = telebot.TeleBot("5505410546:AAHxnzeBdA3BT4UrCKaSYHxGyvfg7vS9EIg")
+        ides_old, ides_new=read_file()
+        for id in set(ides_new):
+            if str(id) not in ides_old:
+                f=open('chat_ides.txt', 'a')
+                f.write(id+'\n')
+                f.close() 
+        check=ides_old+ides_new
+        for id in set(check):
+            bot.send_message(id, res["text"][res['text'].find('отправь')+8::])  
+
     if fuzz.partial_ratio('жесты', res["text"])>=90:
         try:
+            date_create=time.time()
+            print('Запущено управление жестами')
             Keyboard_mini.main()
         except Exception:
             print('Ошибка')
+
+    if fuzz.partial_ratio('напиши', res["text"])>=100:
+        paste(res["text"][res['text'].find('напиши')+7::])
+
+    if fuzz.partial_ratio('закрой', res["text"])>=90:
+        try:
+            for p in psutil.process_iter(['name']): 
+                if p.create_time()-date_create >=0 and p.create_time()-date_create <=0.5:
+                    p.kill()
+        except Exception:
+            print('Не удалось закрыть программу')
+
     
 def reading_model():
     if not os.path.exists("model.txt"):
